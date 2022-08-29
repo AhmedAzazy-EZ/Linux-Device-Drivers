@@ -1,0 +1,27 @@
+/**************NOTE********************
+ *This File must be included in your target dts file 
+ *e.g am335x_beaglebone.dts
+ */
+
+/ {
+	pcdev-1 {
+		compatible = "pcdev-A1X";
+		org,size= <512>;
+		org,device-serial-num = "pcdev1-123";
+		org,perm = <0x11>;	
+	};
+
+	pcdev-2 {
+		compatible = "pcdev-B1X";
+		org,size= <512>;
+		org,device-serial-num = "pcdev2-123";
+		org,perm = <0x11>;	
+	};
+
+	pcdev-3 {
+		compatible = "pcdev-C1X";
+		org,size= <512>;
+		org,device-serial-num = "pcdev3-123";
+		org,perm = <0x11>;	
+	};
+};
