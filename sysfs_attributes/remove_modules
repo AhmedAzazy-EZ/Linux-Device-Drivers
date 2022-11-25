@@ -1,0 +1,6 @@
+rmmod ./pcd_sysfs_f.ko
+dmesg
+sleep .5
+rmmod ./pcd_sysfs_devices.ko
+sleep .5
+dmesg
