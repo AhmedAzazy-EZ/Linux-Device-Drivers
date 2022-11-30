@@ -1,0 +1,3 @@
+insmod ./gpio_sysfs.ko
+sleep .5
+dmesg
