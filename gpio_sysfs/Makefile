@@ -1,4 +1,5 @@
-obj-m := gpio_sysfs.o
+obj-m := pcd_sysfs_f.o pcd_sysfs_devices.o
+pcd_sysfs_f-objs += pcd_sysfs.o pcd_syscall.o 
 ARCH=arm
 CROSS_COMPILE=arm-linux-gnueabihf-
 HOST_KERN_DIR = /lib/modules/$(shell uname -r)/build/
