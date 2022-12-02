@@ -42,119 +42,9 @@ ssize_t value_store(struct device *dev, struct device_attribute *attr, const cha
 ssize_t value_show(struct device *dev, struct device_attribute *attr, char *buf);
 
 
-ssize_t value_show(struct device *dev, struct device_attribute *attr, char *buf)
-{
-	ssize_t count;
-	struct dev_drv_prvdata * dev_data ;
-
-	dev_data = dev_get_drvdata(dev);
-
-	if(!dev_data)
-	{
-		pr_err("Cannot get the device private data\n");
-		return -EINVAL;
-	}
-	count = sprintf(buf , "%d" , gpiod_get_value(dev_data->desc));
-
-	return count;
-}
-ssize_t value_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	long val ;
-	struct dev_drv_prvdata * dev_data ;
-
-	dev_data = dev_get_drvdata(dev);
-
-	if(!dev_data)
-	{
-		pr_err("Cannot get the device private data\n");
-		return -EINVAL;
-	}
-
-	if(kstrtol(buf , 10 , &val))
-	{
-		pr_err("Invalid input\n");
-		return -EINVAL;
-
-	}
-
-	switch (val)
-	{
-	case 0:
-	case 1:
-		gpiod_set_value(dev_data->desc, (int )val);
-		break;
-
-	default :
-		return -EINVAL;
-	}
-
-	pr_info("gpio %s value updated to %d\n" , dev_data->label , (int )val);
-	return count;
-}
-ssize_t direction_show(struct device *dev, struct device_attribute *attr, char *buf)
-{
-	struct dev_drv_prvdata * dev_data ;
-	int dir;
-	char *direction;
-
-	dev_data = dev_get_drvdata(dev);
-
-	if(!dev_data)
-	{
-		pr_err("Cannot get the device private data\n");
-		return -EINVAL;
-	}
-
-	dir = gpiod_get_direction(dev_data->desc);
-	if(dir < 0)
-		return dir;
-	/* if dir = 0 , then show "out". if dir =1 , then show "in" */
-	direction = (dir == 0) ? "out":"in";
-
-	return sprintf(buf,"%s\n",direction);
-
-}
-ssize_t direction_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct dev_drv_prvdata * dev_data ;
-	int ret;
-	dev_data = dev_get_drvdata(dev);
-
-	if(!dev_data)
-	{
-		pr_err("Cannot get the device private data\n");
-		return -EINVAL;
-	}
-
-	if(sysfs_streq(buf,"in") )
-		ret = gpiod_direction_input(dev_data->desc);
-	else if (sysfs_streq(buf,"out"))
-		ret = gpiod_direction_output(dev_data->desc,0);
-	else
-		ret = -EINVAL;
-
-	return ret ? : count;
-}
-
-ssize_t label_show(struct device *dev, struct device_attribute *attr, char *buf)
-{
-	struct dev_drv_prvdata * dev_data ;
-
-	dev_data = dev_get_drvdata(dev);
-
-	if(!dev_data)
-	{
-		pr_err("Cannot get the device private data\n");
-		return -EINVAL;
-	}
-	return sprintf(buf, "%s\n", dev_data->label);
-}
-
 static DEVICE_ATTR_RW(value);
 static DEVICE_ATTR_RW(direction);
 static DEVICE_ATTR_RO(label);
-
 
 
 struct of_device_id of_match[] = {
@@ -311,6 +201,116 @@ void __exit gpio_driver_exit(void)
 
 	return ;
 }
+
+ssize_t value_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	ssize_t count;
+	struct dev_drv_prvdata * dev_data ;
+
+	dev_data = dev_get_drvdata(dev);
+
+	if(!dev_data)
+	{
+		pr_err("Cannot get the device private data\n");
+		return -EINVAL;
+	}
+	count = sprintf(buf , "%d" , gpiod_get_value(dev_data->desc));
+
+	return count;
+}
+ssize_t value_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	long val ;
+	struct dev_drv_prvdata * dev_data ;
+
+	dev_data = dev_get_drvdata(dev);
+
+	if(!dev_data)
+	{
+		pr_err("Cannot get the device private data\n");
+		return -EINVAL;
+	}
+
+	if(kstrtol(buf , 10 , &val))
+	{
+		pr_err("Invalid input\n");
+		return -EINVAL;
+
+	}
+
+	switch (val)
+	{
+	case 0:
+	case 1:
+		gpiod_set_value(dev_data->desc, (int )val);
+		break;
+
+	default :
+		return -EINVAL;
+	}
+
+	pr_info("gpio %s value updated to %d\n" , dev_data->label , (int )val);
+	return count;
+}
+ssize_t direction_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct dev_drv_prvdata * dev_data ;
+	int dir;
+	char *direction;
+
+	dev_data = dev_get_drvdata(dev);
+
+	if(!dev_data)
+	{
+		pr_err("Cannot get the device private data\n");
+		return -EINVAL;
+	}
+
+	dir = gpiod_get_direction(dev_data->desc);
+	if(dir < 0)
+		return dir;
+	/* if dir = 0 , then show "out". if dir =1 , then show "in" */
+	direction = (dir == 0) ? "out":"in";
+
+	return sprintf(buf,"%s\n",direction);
+
+}
+ssize_t direction_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct dev_drv_prvdata * dev_data ;
+	int ret;
+	dev_data = dev_get_drvdata(dev);
+
+	if(!dev_data)
+	{
+		pr_err("Cannot get the device private data\n");
+		return -EINVAL;
+	}
+
+	if(sysfs_streq(buf,"in") )
+		ret = gpiod_direction_input(dev_data->desc);
+	else if (sysfs_streq(buf,"out"))
+		ret = gpiod_direction_output(dev_data->desc,0);
+	else
+		ret = -EINVAL;
+
+	return ret ? : count;
+}
+
+ssize_t label_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct dev_drv_prvdata * dev_data ;
+
+	dev_data = dev_get_drvdata(dev);
+
+	if(!dev_data)
+	{
+		pr_err("Cannot get the device private data\n");
+		return -EINVAL;
+	}
+	return sprintf(buf, "%s\n", dev_data->label);
+}
+
 
 module_init(gpio_driver_init);
 module_exit(gpio_driver_exit);
