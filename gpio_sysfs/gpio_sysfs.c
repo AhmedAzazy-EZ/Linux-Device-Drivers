@@ -107,7 +107,7 @@ int gpio_sysfs_probe(struct platform_device *dev)
 	if(!parent)
 	{
 		pr_err("Cant get the parent node\n");
-		return PTR_ERR(dev_data);
+		return PTR_ERR(parent);
 	}
 
 	platform_drv_data.number_of_child_nodes = of_get_child_count(parent);
