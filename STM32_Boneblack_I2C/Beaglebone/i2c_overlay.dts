@@ -1,0 +1,1 @@
+/dts-v1/;/plugin/;/{ /* this is our device tree overlay root node */  fragment@0 {    target = <&i2c1>;    __overlay__ {      clock-frequency = <100000>;      status = "okay";      stm: stm@68 {        compatible = "stmBBB,STM";        #address-cells = <1>;        #size-cells = <0>;        reg = <0x68>;      };    };  };}; /* root node end */
