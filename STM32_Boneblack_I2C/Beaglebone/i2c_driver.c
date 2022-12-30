@@ -97,7 +97,7 @@ int i2c_probe(struct i2c_client *client, const struct i2c_device_id *id)
 		printk("Error I2C client\n");
 		return PTR_ERR(client);
 	}
-	ent=proc_create("stmBBB_STM",0660,NULL,&fops);
+	ent=proc_create("stmBBB_STM",0666,NULL,&fops);
 	STM32F4_I2C_client = client;
 	return 0;
 }
@@ -106,39 +106,15 @@ int i2c_probe(struct i2c_client *client, const struct i2c_device_id *id)
 int i2c_remove(struct i2c_client *client)
 {
 	printk("I2C_driver removed Successfully\n");
-	cdev_del(&drv_prv_data.cdev);
 	return 0;
 }
 static int __init i2c_init(void)
 {
 	int ret ;
-
-//	ret = alloc_chrdev_region(&drv_prv_data.dev ,0, drv_prv_data.devices_count , "stmBBB_STM");
-//	if(ret)
-//	{
-//		printk("Driver Cannot allocate device Number\n");
-//		return -EINVAL;
-//	}
-//
-//	cdev_init(&drv_prv_data.cdev , &fops);
-//
-//	ret = cdev_add(&drv_prv_data.cdev, drv_prv_data.dev+0 , drv_prv_data.devices_count);
-//
-//	if(ret < 0)
-//	{
-//		printk("Cannot add device to the kerenel\n");
-//		unregister_chrdev_region(drv_prv_data.dev , drv_prv_data.devices_count);
-//		return -EINVAL;
-//
-//	}
-//
-//	drv_prv_data.my_device = device_create(drv_prv_data.Pclass , NULL , drv_prv_data.dev , NULL , "stmBBB_STM");
 	ret = i2c_add_driver(&my_driver);
 	if(ret)
 	{
 		printk("CANT register the I2C driver\n");
-//		cdev_del(&drv_prv_data.cdev);
-//		unregister_chrdev_region(drv_prv_data.dev , drv_prv_data.devices_count);
 		return -EINVAL;
 	}
 	printk("the I2C driver loaded successfully\n");
@@ -148,27 +124,50 @@ static int __init i2c_init(void)
 static void __exit i2c_exit(void )
 {
 	printk("Unloading the I2C driver\n");
+	i2c_del_driver(&my_driver);
 	proc_remove(ent);
 	return;
 }
 
 ssize_t I2C_write (struct file *File, const char *user_buffer, size_t count, loff_t *offs)
 {
-	long val , i;
+	int ret;
+	char * temp;
+	struct i2c_msg msg;
 	printk("I2c write Handler\n");
-	for(i = 0 ; i < count ; i++)
-	{
-		if(0 == kstrtol(user_buffer[i], 0, &val))
-			i2c_smbus_write_byte(STM32F4_I2C_client, (u8) val);
-	}
+	temp = memdup_user(user_buffer, count);
+	msg.addr = 0x02;
+	msg.flags = 0;
+	msg.len = count;
+	msg.buf = temp;
+
+	ret = i2c_transfer(STM32F4_I2C_client->adapter ,&msg,1);
+//	i2c_smbus_write_byte(STM32F4_I2C_client, '1');
+
+	kfree(temp);
 	return count;
 }
 
-ssize_t I2C_read(struct file *File, char *user_buffer, size_t count, loff_t *offs) {
-	s32 my_char;
-	printk("I2c Read Handler\n");
-	my_char = i2c_smbus_read_byte(STM32F4_I2C_client);
-	return sprintf(user_buffer, "%d\n", my_char);
+ssize_t I2C_read(struct file *File, char *user_buffer, size_t count, loff_t *offs)
+{
+
+	struct i2c_msg msg;
+	char *temp;
+	int ret;
+
+	temp = kmalloc(count, GFP_KERNEL);
+
+	msg.addr = 0x68;
+	msg.flags = 0;
+	msg.flags |= I2C_M_RD;
+	msg.len = count;
+	msg.buf = temp;
+
+	ret = i2c_transfer(STM32F4_I2C_client->adapter, &msg, 1);
+	if (ret >=0)
+		ret = copy_to_user(user_buffer, temp, count) ? -EFAULT : count;
+	kfree(temp);
+	return ret;
 }
 
 module_init(i2c_init);
