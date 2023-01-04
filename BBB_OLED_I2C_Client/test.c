@@ -8,7 +8,7 @@
 #include "test.h"
 #include "ssd1306.h"
 
-#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define min_SSD(a, b) (((a) < (b)) ? (a) : (b))
 
 void TestLines(uint8_t color)
 {
@@ -106,7 +106,7 @@ void TestRectangles (uint8_t color)
 
     SSD1306_Clear ();
 
-    n = min(SSD1306_WIDTH, SSD1306_HEIGHT);
+    n = min_SSD(SSD1306_WIDTH, SSD1306_HEIGHT);
 
     for (i = 2; i < n; i += 6)
     {
@@ -125,7 +125,7 @@ void TestFilledRectangles (uint8_t color)
 
     SSD1306_Clear ();
 
-    n = min(SSD1306_WIDTH, SSD1306_HEIGHT);
+    n = min_SSD(SSD1306_WIDTH, SSD1306_HEIGHT);
     for (i = n; i > 0; i -= 6)
     {
         i2    = i / 2;
@@ -178,7 +178,7 @@ void TestTriangles(uint8_t color)
 
     SSD1306_Clear ();
 
-    n = min(cx, cy);
+    n = min_SSD(cx, cy);
     for (i = 0; i < n; i += 5)
     {
         SSD1306_DrawTriangle(cx , cy - i, cx - i, cy + i, cx + i, cy + i, color);

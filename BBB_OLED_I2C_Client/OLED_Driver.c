@@ -23,6 +23,9 @@
 #include <linux/kernel.h>
 #include <linux/proc_fs.h>
 
+#include "fonts.h"
+#include "ssd1306.h"
+#include "test.h"
 #include "bitmap.h"
 #include "horse_anim.h"
 
@@ -72,7 +75,7 @@ static struct file_operations fops =
 //   .open = I2C_open,
 	.owner = THIS_MODULE,
    .read = OLED_read,
-   .write = I2C_write,
+   .write = OLED_write,
 //   .release = I2C_release,
 };
 
@@ -96,10 +99,25 @@ int OLED_probe(struct i2c_client *client, const struct i2c_device_id *id)
 		printk("Error I2C client\n");
 		return PTR_ERR(client);
 	}
-	ent=proc_create("stmBBB_STM",0666,NULL,&fops);
+	ent=proc_create("OLED_SSD1306",0666,NULL,&fops);
 	OLED_I2C_Client = client;
 
+	  SSD1306_Init();  // initialise
 
+	  /// lets print some string
+
+	    SSD1306_GotoXY (0,0);
+	    SSD1306_Puts ("HELLO", &Font_11x18, 1);
+	    SSD1306_GotoXY (10, 30);
+	    SSD1306_Puts ("  WORLD :)", &Font_11x18, 1);
+	    SSD1306_UpdateScreen(); //display
+
+	return 0;
+}
+
+int OLED_remove(struct i2c_client *client)
+{
+	printk("device Remove\n");
 	return 0;
 }
 static int __init OLED_Client_driver_init(void)

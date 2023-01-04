@@ -1,5 +1,5 @@
-obj-m := OLED_Driver.o
-OLED_Driver-objs += fonts.o ssd1306.o test.o
+obj-m := OLED_Driver_MOD.o
+OLED_Driver_MOD-objs += OLED_Driver.o fonts.o ssd1306.o test.o
 ARCH=arm
 ARCH=arm
 CROSS_COMPILE=arm-buildroot-linux-uclibcgnueabihf-
